@@ -1,17 +1,34 @@
+"use client"
+
 import { createAction } from "@/app/action";
-import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/SubmitButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { startTransition, SyntheticEvent, useState } from "react";
 
+// eslint-disable-next-line @next/next/no-async-client-component
 export default async function Home() {
+    const [state,setState]=useState('ready');
+    
+   async function handleOnsubmit(event:SyntheticEvent){
+        event.preventDefault();
+        if(state==='pending') return;
+        setState('pending'); 
+        const target=event.target as HTMLFormElement;
+        startTransition(async ()=>{
+            const formData=new FormData(target);
+            await createAction(formData)     
+        })
+        
+    }
      
   return (
     <main className=" flex flex-col justify-center h-full  gap-6 max-w-5xl mx-auto">
       <h1 className="text-5xl font-bold">Create Invoice</h1>
       <div>
         
-        <form action={createAction} className="grid gap-4 max-w-xs">
+        <form action={createAction} onSubmit={handleOnsubmit} className="grid gap-4 max-w-xs">
             <div>
                 <Label htmlFor="name" className="block font-semibold mb-2">Billing Name</Label>
                 <Input type="text" name="name" id="name"/>
@@ -29,9 +46,7 @@ export default async function Home() {
                 <Textarea name="description" id="description"></Textarea>
             </div>
             <div>
-                <Button className="w-full font-semibold">
-                    Submit
-                </Button>
+                <SubmitButton/>
             </div>
             
         </form>
